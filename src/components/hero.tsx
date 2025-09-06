@@ -24,7 +24,6 @@ export default function Hero() {
         transition={{ duration: 0.5 }}
         className="flex flex-col items-center text-center"
       >
-        <p className="text-sm text-muted-foreground">Portfolio</p>
 
         {/* Photo */}
         <Image
