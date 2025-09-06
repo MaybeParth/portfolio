@@ -1,26 +1,36 @@
 export const projects = [
   {
     title: "StrideGuard (Mobile Physio)",
-    description:
-      "Cross-platform app computing drop angle/time and motor velocity from smartphone sensors; offline-first with local DB.",
+    description: "Smartphone-sensor physio tests with offline patient DB.",
     tech: ["Flutter", "Sensors", "SQLite"],
-    repo: "https://github.com/MaybeParth/RLD_mobile/tree/master",
+    repo: "https://github.com/MaybeParth/RLD_mobile/tree/master",                 
+    image: "/projects/strideguard.jpeg",               // optional (put under /public/projects/)
   },
   {
-    title: "E-Commerce (Spring Boot)",
-    description:
-      "Product catalog, cart, checkout, and order tracking with PostgreSQL & Redis caching.",
-    tech: ["Java", "Spring Boot", "PostgreSQL", "Redis"],
-    repo: "https://github.com/yourname/shop",
+    title: "Ourlib",
+    description: "Catalog, cart, checkout, and order tracking.",
+    tech: ["JavaScript", "ReactJS", "SQlite", "Firebase"],
+    repo: "https://github.com/MaybeParth/ourlib",
+    link: "https://play.google.com/store/search?q=ourlib&c=apps&hl=en_US",
+    image: "/projects/ourlib.jpeg",
   },
   {
     title: "Flight Delay ML",
-    description:
-      "Built features from BTS + weather data; trained gradient models; exported explainable dashboards.",
+    description: "Feature engineering on BTS + weather; interpretable models.",
     tech: ["Python", "pandas", "scikit-learn"],
     repo: "https://github.com/NiranjanBalasubramani/flight-predictor",
+    image: "/projects/flight.png",
   },
+  // {
+  //   title: "E-Commerce (Spring Boot)",
+  //   description: "Catalog, cart, checkout, and order tracking.",
+  //   tech: ["Java", "Spring Boot", "PostgreSQL", "Redis"],
+  //   repo: "https://github.com/yourname/shop",
+  //   //image: "/projects/shop.png",
+  // },
+  
 ];
+
 
 export const experiences = [
   {
@@ -66,5 +76,24 @@ export const experiences = [
       "Revamped architecture with Provider and optimized DB queries—shrinking app size by ~70%, lowering latency by ~20%, and scaling smoothly under ~5× data growth."
     ]
   }
+];
+
+// src/lib/data.ts
+export const skills = [
+  { text: "Next.js", value: 80 },
+  { text: "React", value: 90 },
+  { text: "TypeScript", value: 85 },
+  { text: "Tailwind CSS", value: 70 },
+  { text: "Node.js", value: 75 },
+  { text: "Express", value: 55 },
+  { text: "PostgreSQL", value: 60 },
+  { text: "Redis", value: 45 },
+  { text: "React Native", value: 70 },
+  { text: "Flutter", value: 65 },
+  { text: "Python", value: 70 },
+  { text: "scikit-learn", value: 50 },
+  { text: "Git", value: 60 },
+  { text: "AWS", value: 55 },
+  { text: "Docker", value: 50 },
 ];
 
