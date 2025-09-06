@@ -63,7 +63,7 @@ export default function Hero() {
           <a href="#projects" className="rounded-xl border px-4 py-2 text-sm hover:bg-accent">
             View Projects
           </a>
-          <a href="/Parth_Kulkarni_Resume.pdf" className="rounded-xl border px-4 py-2 text-sm hover:bg-accent">
+          <a href="/Parth_Resume_SDE.pdf" className="rounded-xl border px-4 py-2 text-sm hover:bg-accent">
             Download Resume
           </a>
         </div>
