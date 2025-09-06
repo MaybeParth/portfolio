@@ -3,6 +3,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { Github, Linkedin, Instagram, Mail } from "lucide-react"; // 👈 new icons
 import { useTypewriterCycle } from "@/hooks/use-typewriter-cycle";
 import useMounted from "@/hooks/use-mounted";
 import headshot from "/public/parth.jpeg";
@@ -24,7 +25,6 @@ export default function Hero() {
         transition={{ duration: 0.5 }}
         className="flex flex-col items-center text-center"
       >
-
         {/* Photo */}
         <Image
           src={headshot}
@@ -58,14 +58,64 @@ export default function Hero() {
           {roleText}
         </p>
 
-        {/* CTA buttons */}
-        <div className="mt-6 flex gap-3">
+        {/* CTA row + socials on the SAME line */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <a href="#projects" className="rounded-xl border px-4 py-2 text-sm hover:bg-accent">
             View Projects
           </a>
-          <a href="/Parth_Resume_SDE.pdf" className="rounded-xl border px-4 py-2 text-sm hover:bg-accent">
+          <a
+            href="/Parth_Resume_SDE.pdf"
+            className="rounded-xl border px-4 py-2 text-sm hover:bg-accent"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Download Resume
           </a>
+
+          {/* Socials inline */}
+          <div className="ml-1 flex items-center gap-2">
+            <a
+              href="https://github.com/MaybeParth"               // ← update if needed
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
+            >
+              <Github className="h-4 w-4" />
+              <span className="sr-only">GitHub</span>
+            </a>
+
+            <a
+              href="https://www.linkedin.com/in/parth-pramod-kulkarni-78a049227/"    // ← replace with your LinkedIn URL
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
+            >
+              <Linkedin className="h-4 w-4" />
+              <span className="sr-only">LinkedIn</span>
+            </a>
+
+            <a
+              href="https://www.instagram.com/pque_oh/"      // ← replace with your Instagram
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
+            >
+              <Instagram className="h-4 w-4" />
+              <span className="sr-only">Instagram</span>
+            </a>
+
+            <a
+              href="mailto:parth.kulkarni45@gmail.com"                      // ← replace with your email
+              aria-label="Email Parth"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
+            >
+              <Mail className="h-4 w-4" />
+              <span className="sr-only">Email</span>
+            </a>
+          </div>
         </div>
 
         {/* Subcopy */}

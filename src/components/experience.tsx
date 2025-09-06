@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 
 export default function Experience() {
   return (
-    <section className="py-12">
+    <section id="experience" className="py-12">
       <h2 className="text-xl md:text-2xl font-semibold mb-6">Experience</h2>
       <div className="space-y-4">
         {experiences.map((e) => (
