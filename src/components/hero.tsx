@@ -10,7 +10,7 @@ import headshot from "/public/parth.jpeg";
 
 export default function Hero() {
   const { text: nameText, blink: blinkName } = useTypewriterCycle(
-    ["Parth Kulkarni", "Curious", "Relentless", "A Builder", "A Problem Solver"],
+    ["Parth Kulkarni", "Curious", "Collaborative", "A Builder", "A Problem Solver"],
     { typingSpeed: 80, deletingSpeed: 40, pauseBetweenWords: 1200 }
   );
 
