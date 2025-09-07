@@ -8,7 +8,6 @@ export default function Home() {
     <>
       <Hero />
       <Projects />
-      <Experience />
       <section id="contact" className="py-12">
         <h2 className="text-xl md:text-2xl font-semibold mb-6">Contact</h2>
         <ContactForm />
