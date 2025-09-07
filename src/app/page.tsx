@@ -1,6 +1,5 @@
 import Hero from "@/components/hero";
 import Projects from "@/components/projects";
-import Experience from "@/components/experience";
 import ContactForm from "@/components/contact-form";
 
 export default function Home() {

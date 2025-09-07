@@ -29,19 +29,17 @@ type CSSVars = CSSProperties & {
 
 const clamp = (n: number, min = 0, max = 1) => Math.max(min, Math.min(max, n));
 
-/** Fixed haptic feedback function */
+/** Haptic feedback without `any` */
 function useHaptics(value: number) {
   const prev = useRef(value);
   useEffect(() => {
     if (prev.current !== value) {
       try {
-        // Check if the device supports vibration
-        if (typeof navigator !== 'undefined' && 'vibrate' in navigator && navigator.vibrate) {
+        if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
           navigator.vibrate(25);
         }
-      } catch (error) {
-        // Silently fail if vibration is not supported
-        console.debug('Vibration not supported');
+      } catch {
+        /* noop */
       }
       prev.current = value;
     }
@@ -112,15 +110,11 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
   const i = activeIndex;
   const t = i < data.length - 1 ? activeProgress : 0;
 
-  // Define milestone threshold - card is fully opaque when at start of section
   const milestoneThreshold = 0.15; // First 15% of scroll in section = milestone
   const hold = 0.4; // Hold the current card clearly visible for longer
   const easeOutQuad = (x: number) => 1 - Math.pow(1 - x, 2);
-  
-  // Check if we're at a milestone (new section start)
+
   const atMilestone = activeProgress <= milestoneThreshold;
-  
-  // p starts moving only after the hold window
   const p = t <= hold ? 0 : easeOutQuad((t - hold) / (1 - hold));
 
   // Compute tilt and shadows based on raw scroll, not the held progress
@@ -130,8 +124,6 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
   // CURRENT (background as we move on) — stays very opaque & barely shrinks
   const currentScale = 1 - 0.04 * p;
   const currentTranslateY = -8 * p; // slight lift
-  
-  // MILESTONE LOGIC: Force completely opaque at milestone, then fade normally
   const currentOpacity = atMilestone ? 1 : Math.max(0.3, 1 - 0.12 * p);
 
   // NEXT (foreground incoming) — starts much later & rises from below
@@ -142,14 +134,9 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
   const overshootEase = "cubic-bezier(0.175,0.885,0.32,1.275)";
 
   const currentItem = useMemo(() => data[i], [data, i]);
-  const nextItem = useMemo(
-    () => (i < data.length - 1 ? data[i + 1] : null),
-    [data, i]
-  );
+  const nextItem = useMemo(() => (i < data.length - 1 ? data[i + 1] : null), [data, i]);
 
-  if (!data.length) return null;
-
-  // Ripple refs & logic (very light white ripple on cursor move)
+  // ----- Ripple refs & handlers MUST be before any return (no conditional hooks) -----
   const activeWrapperRef = useRef<HTMLDivElement | null>(null);
   const rippleRef = useRef<HTMLDivElement | null>(null);
   const lastRippleAt = useRef<number>(0);
@@ -170,9 +157,8 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
     const now = performance.now();
     if (now - lastRippleAt.current > 120) {
       rip.classList.remove("animate-ripple");
-      // force reflow to restart animation
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      rip.offsetHeight;
+      // force reflow to restart animation (avoid no-unused-expressions)
+      void rip.offsetHeight;
       rip.classList.add("animate-ripple");
       lastRippleAt.current = now;
     }
@@ -182,10 +168,13 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
     rippleRef.current?.classList.remove("animate-ripple");
   }, []);
 
+  // Guarded render AFTER all hooks are declared
+  if (!data.length) return null;
+
   const currentCardStyle: CSSVars = {
     transform: `perspective(1200px) rotateX(calc(${baseTiltX}deg + var(--tiltAddX, 0deg))) rotateY(var(--tiltY, 0deg)) translateY(${currentTranslateY}px) scale(${currentScale})`,
-    transition: atMilestone 
-      ? "transform 200ms ease, opacity 200ms ease, box-shadow 200ms ease" 
+    transition: atMilestone
+      ? "transform 200ms ease, opacity 200ms ease, box-shadow 200ms ease"
       : "transform 300ms ease, opacity 300ms ease, box-shadow 300ms ease",
     opacity: currentOpacity,
     boxShadow: `0 30px 60px -18px rgba(0,0,0,${shadowStrength})`,
@@ -222,7 +211,6 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
                 className={[
                   "absolute h-5 w-5 -translate-y-1/2 rounded-full border-2 border-background transition-all duration-300",
                   idx <= activeIndex ? "bg-foreground shadow" : "bg-muted",
-                  // Highlight current milestone
                   idx === activeIndex && atMilestone ? "ring-2 ring-foreground/30 ring-offset-1" : "",
                 ].join(" ")}
                 style={{
@@ -238,7 +226,7 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
         </div>
       </div>
 
-      {/* Mobile scrollbar (left side) - adjusted positioning */}
+      {/* Mobile progress rail (left side) */}
       <div className="fixed left-3 top-1/2 z-40 -translate-y-1/2 md:hidden" aria-hidden>
         <div className="relative">
           <div className="h-48 w-1 overflow-hidden rounded-full bg-border/60" />
@@ -246,7 +234,6 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
             className="absolute left-0 top-0 w-1 rounded-full bg-gradient-to-b from-blue-500 to-purple-500 transition-[height] duration-300 ease-out"
             style={{ height: `${scrollProgress * 100}%` }}
           />
-          {/* Mobile milestone dots */}
           <div className="absolute -left-1.5 top-0 h-full">
             {data.map((_, idx) => (
               <div
@@ -254,7 +241,6 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
                 className={[
                   "absolute h-4 w-4 -translate-y-1/2 rounded-full border-2 border-background transition-all duration-300",
                   idx <= activeIndex ? "bg-blue-500 shadow-md shadow-blue-500/20" : "bg-muted",
-                  // Highlight current milestone on mobile
                   idx === activeIndex && atMilestone ? "ring-1 ring-blue-500/40" : "",
                 ].join(" ")}
                 style={{
@@ -266,10 +252,9 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
         </div>
       </div>
 
-      {/* Enhanced Mobile progress info capsule - now clickable for navigation */}
+      {/* Bottom capsule (kept) */}
       <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 md:bottom-8">
         <div className="rounded-full bg-background/95 backdrop-blur-md border border-border/50 px-6 py-3 shadow-2xl shadow-black/10">
-          {/* Navigation arrows */}
           <div className="flex items-center justify-between mb-2">
             <button
               onClick={() => scrollToIndex(activeIndex - 1)}
@@ -279,11 +264,9 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
             >
               <ChevronDown className="h-4 w-4 rotate-90 text-foreground" />
             </button>
-            
-            <div className="text-xs text-muted-foreground font-medium">
-              Tap to navigate
-            </div>
-            
+
+            <div className="text-xs text-muted-foreground font-medium">Tap to navigate</div>
+
             <button
               onClick={() => scrollToIndex(activeIndex + 1)}
               disabled={activeIndex === data.length - 1}
@@ -296,25 +279,24 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
 
           <div className="flex items-center gap-4 text-sm min-w-0">
             <span className="font-semibold text-foreground tabular-nums shrink-0">{activeIndex + 1}</span>
-            
-            {/* Enhanced progress bar - now clickable */}
-            <div className="flex-1 min-w-16 cursor-pointer" onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const clickX = e.clientX - rect.left;
-              const percentage = clickX / rect.width;
-              const targetIndex = Math.round(percentage * (data.length - 1));
-              scrollToIndex(clamp(targetIndex, 0, data.length - 1));
-            }}>
+
+            <div
+              className="flex-1 min-w-16 cursor-pointer"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const percentage = clickX / rect.width;
+                const targetIndex = Math.round(percentage * (data.length - 1));
+                scrollToIndex(clamp(targetIndex, 0, data.length - 1));
+              }}
+            >
               <div className="h-1.5 bg-border/60 rounded-full overflow-hidden relative group hover:h-2 transition-all duration-200">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500 ease-out relative"
                   style={{ width: `${((activeIndex + 1) / data.length) * 100}%` }}
                 >
-                  {/* Glowing dot at the end */}
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-lg shadow-blue-500/40 group-hover:w-2.5 group-hover:h-2.5 transition-all duration-200" />
                 </div>
-                
-                {/* Section markers */}
                 <div className="absolute inset-0 flex">
                   {data.map((_, idx) => (
                     <div
@@ -326,27 +308,22 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
                 </div>
               </div>
             </div>
-            
+
             <span className="text-muted-foreground tabular-nums shrink-0">{data.length}</span>
           </div>
-          
-          {/* Current experience info - clickable for current item details */}
-          <button 
+
+          <button
             className="mt-2 text-center min-w-0 w-full hover:bg-foreground/5 rounded-lg p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-foreground/30"
             onClick={() => {
-              // Scroll to ensure the current card is perfectly centered
               scrollToIndex(activeIndex);
             }}
           >
-            <div className="text-sm font-medium truncate text-foreground">
-              {currentItem.role}
-            </div>
+            <div className="text-sm font-medium truncate text-foreground">{currentItem.role}</div>
             <div className="text-xs text-muted-foreground truncate">
               {currentItem.company} • {currentItem.start}
             </div>
           </button>
-          
-          {/* Milestone indicator */}
+
           {atMilestone && (
             <div className="absolute -top-1 left-1/2 -translate-x-1/2">
               <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse shadow-lg shadow-blue-500/40" />
@@ -355,47 +332,43 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
         </div>
       </div>
 
-      {/* Internal scroller - with scroll snap */}
+      {/* Internal scroller - with scroll snap, hidden scrollbar */}
       <div
         ref={scrollerRef}
         className="h-full overflow-y-auto scroll-smooth"
-        style={{ 
-          scrollbarWidth: "none", 
+        style={{
+          scrollbarWidth: "none",
           msOverflowStyle: "none",
-          scrollSnapType: "y mandatory", // Enable scroll snap
-          scrollBehavior: "smooth"
+          scrollSnapType: "y mandatory",
+          scrollBehavior: "smooth",
         }}
         aria-label="Scroll to browse experience items"
       >
-        {/* track height: one full viewport per item with snap points */}
         <div style={{ height: `${data.length * 100}vh` }}>
-          {/* Add invisible snap points */}
           {data.map((_, idx) => (
             <div
               key={`snap-${idx}`}
               style={{
-                position: 'absolute',
+                position: "absolute",
                 top: `${idx * 100}vh`,
-                height: '100vh',
-                width: '100%',
-                scrollSnapAlign: 'start',
-                scrollSnapStop: 'always',
+                height: "100vh",
+                width: "100%",
+                scrollSnapAlign: "start",
+                scrollSnapStop: "always",
               }}
             />
           ))}
         </div>
 
-        {/* CENTERED LAYER — stays pinned; we paint current & next here */}
-        {/* Fixed mobile centering with proper padding and safer positioning */}
+        {/* CENTERED LAYER — current & next */}
         <div className="pointer-events-none sticky inset-0 -mt-[100vh] flex h-screen items-center justify-center">
-          {/* Current card (always rendered) - adjusted mobile padding */}
+          {/* Current card */}
           <div
             ref={activeWrapperRef}
             className="relative w-full max-w-3xl px-3 sm:px-4 md:px-6 lg:px-8"
             style={{
-              // Better mobile centering - account for safe areas and UI elements
-              paddingTop: 'env(safe-area-inset-top, 20px)',
-              paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 120px)', // Account for bottom capsule
+              paddingTop: "env(safe-area-inset-top, 20px)",
+              paddingBottom: "calc(env(safe-area-inset-bottom, 20px) + 120px)",
             }}
             onMouseMove={onMouseMove}
             onMouseLeave={clearRipple}
@@ -403,24 +376,18 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
             <Card
               className={[
                 "card-frame relative origin-center pointer-events-auto border-border/50 bg-card shadow-2xl transition-all duration-300",
-                // Enhanced styling at milestones
-                atMilestone 
-                  ? "border-foreground/20 shadow-3xl ring-1 ring-foreground/10" 
-                  : "border-border/50"
+                atMilestone ? "border-foreground/20 shadow-3xl ring-1 ring-foreground/10" : "border-border/50",
               ].join(" ")}
               style={currentCardStyle}
             >
-              {/* Soft, light ripple overlay (white, very low opacity) */}
-              <div
-                ref={rippleRef}
-                className="pointer-events-none absolute inset-0 rounded-xl ripple-overlay"
-              />
-              
+              {/* Subtle ripple overlay */}
+              <div ref={rippleRef} className="pointer-events-none absolute inset-0 rounded-xl ripple-overlay" />
+
               {/* Milestone indicator glow */}
               {atMilestone && (
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 rounded-xl pointer-events-none" />
               )}
-              
+
               <CardInner
                 item={currentItem}
                 active={true}
@@ -431,14 +398,14 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
             </Card>
           </div>
 
-          {/* Next card (overlaps from below, fades in later) - mobile adjustments */}
+          {/* Next card */}
           {nextItem && !atMilestone && (
             <div className="pointer-events-none absolute inset-0 grid place-items-center">
-              <div 
+              <div
                 className="w-full max-w-3xl px-3 sm:px-4 md:px-6 lg:px-8"
                 style={{
-                  paddingTop: 'env(safe-area-inset-top, 20px)',
-                  paddingBottom: 'calc(env(safe-area-inset-bottom, 20px) + 120px)',
+                  paddingTop: "env(safe-area-inset-top, 20px)",
+                  paddingBottom: "calc(env(safe-area-inset-bottom, 20px) + 120px)",
                 }}
               >
                 <Card
@@ -448,7 +415,7 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
                 >
                   <CardInner
                     item={nextItem}
-                    active={p > 0.5} // lets badges/lines feel more "present" after half
+                    active={p > 0.5}
                     ease={overshootEase}
                     activeProgress={p}
                     atMilestone={false}
@@ -459,17 +426,13 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
           )}
         </div>
 
-        {/* spacer so last section completes scroll */}
         <div className="h-[40vh]" />
       </div>
 
-      {/* Clean up scrollbars + ripple keyframes */}
+      {/* hide scrollbar + ripple keyframes */}
       <style jsx>{`
-        ::-webkit-scrollbar {
-          display: none;
-        }
+        ::-webkit-scrollbar { display: none; }
         .ripple-overlay {
-          /* Center defaults (overridden by --rpx/--rpy via JS) */
           --rpx: 50%;
           --rpy: 35%;
           border-radius: 12px;
@@ -479,27 +442,17 @@ export default function ExperienceStacked({ items }: { items?: Item[] }) {
           animation: ripple-fade 700ms ease-out forwards;
           background: radial-gradient(
             220px 220px at var(--rpx) var(--rpy),
-            rgba(255, 255, 255, 0.10) 0%,
+            rgba(255, 255, 255, 0.1) 0%,
             rgba(255, 255, 255, 0.06) 20%,
             rgba(255, 255, 255, 0.03) 40%,
             transparent 65%
           );
-          /* slight blur for softness */
           filter: blur(0.6px);
         }
         @keyframes ripple-fade {
-          0% {
-            opacity: 0.18;
-            transform: scale(0.98);
-          }
-          60% {
-            opacity: 0.10;
-            transform: scale(1.02);
-          }
-          100% {
-            opacity: 0;
-            transform: scale(1.06);
-          }
+          0% { opacity: 0.18; transform: scale(0.98); }
+          60% { opacity: 0.1; transform: scale(1.02); }
+          100% { opacity: 0; transform: scale(1.06); }
         }
       `}</style>
     </section>
@@ -531,13 +484,10 @@ function CardInner({
               id={titleId}
               className={[
                 "mb-1 text-xl leading-tight md:text-2xl transition-all duration-500",
-                // Enhanced styling at milestones
-                atMilestone ? "text-foreground font-bold" : "text-foreground"
+                atMilestone ? "text-foreground font-bold" : "text-foreground",
               ].join(" ")}
               style={{
-                transform: active
-                  ? `translateY(${-(0.5 - activeProgress) * 6}px)`
-                  : undefined,
+                transform: active ? `translateY(${-(0.5 - activeProgress) * 6}px)` : undefined,
               }}
             >
               {item.role}
@@ -552,7 +502,7 @@ function CardInner({
                     rel="noopener noreferrer"
                     className={[
                       "inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground transition-colors duration-200",
-                      atMilestone ? "text-foreground font-semibold" : ""
+                      atMilestone ? "text-foreground font-semibold" : "",
                     ].join(" ")}
                     aria-label={`Open ${item.company} in a new tab`}
                   >
@@ -560,20 +510,24 @@ function CardInner({
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 ) : (
-                  <span className={[
-                    "font-medium text-foreground transition-colors duration-200",
-                    atMilestone ? "font-semibold" : ""
-                  ].join(" ")}>
+                  <span
+                    className={[
+                      "font-medium text-foreground transition-colors duration-200",
+                      atMilestone ? "font-semibold" : "",
+                    ].join(" ")}
+                  >
                     {item.company}
                   </span>
                 )}
               </div>
 
               <div className="flex flex-wrap items-center gap-2 text-sm">
-                <span className={[
-                  "font-medium transition-colors duration-200",
-                  atMilestone ? "text-foreground" : ""
-                ].join(" ")}>
+                <span
+                  className={[
+                    "font-medium transition-colors duration-200",
+                    atMilestone ? "text-foreground" : "",
+                  ].join(" ")}
+                >
                   {item.start} – {item.end}
                 </span>
                 {item.location && (
@@ -591,7 +545,6 @@ function CardInner({
       </CardHeader>
 
       <CardContent className="relative">
-        {/* Achievement bullets with stagger */}
         <ul className="mb-6 space-y-3">
           {item.bullets.map((bullet, idx) => (
             <li
@@ -611,8 +564,7 @@ function CardInner({
                 className={[
                   "mt-2 h-2 w-2 flex-shrink-0 rounded-full transition-colors duration-300",
                   active ? "bg-foreground" : "bg-muted-foreground/40",
-                  // Enhanced bullet at milestone
-                  atMilestone ? "bg-blue-500 shadow-sm shadow-blue-500/20" : ""
+                  atMilestone ? "bg-blue-500 shadow-sm shadow-blue-500/20" : "",
                 ].join(" ")}
               />
               <span className="text-sm leading-relaxed">{bullet}</span>
@@ -628,8 +580,7 @@ function CardInner({
                 variant="outline"
                 className={[
                   "rounded-full transition-all hover:scale-105 hover:bg-foreground hover:text-background",
-                  // Enhanced badges at milestone
-                  atMilestone ? "border-foreground/30 bg-foreground/5" : ""
+                  atMilestone ? "border-foreground/30 bg-foreground/5" : "",
                 ].join(" ")}
                 style={{
                   transitionDuration: "500ms",
