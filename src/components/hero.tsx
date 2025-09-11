@@ -1,128 +1,250 @@
-// src/components/hero.tsx
 "use client";
 
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Github, Linkedin, Instagram, Mail } from "lucide-react"; // 👈 new icons
+import { Github, Linkedin, Instagram, Mail } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useTypewriterCycle } from "@/hooks/use-typewriter-cycle";
 import useMounted from "@/hooks/use-mounted";
+import SignatureMark from "@/assets/signature.svg";
+import { ImageTooltip } from "@/components/ui/image-tooltip";
+import DotToHeadshot from "@/components/dot-to-headshot";
 import headshot from "/public/parth.jpeg";
+import pythonImg from "/public/python.jpg";
 
 export default function Hero() {
   const { text: nameText, blink: blinkName } = useTypewriterCycle(
     ["Parth Kulkarni", "Curious", "Collaborative", "A Builder", "A Problem Solver"],
     { typingSpeed: 80, deletingSpeed: 40, pauseBetweenWords: 1200 }
   );
-
-  const roleText = "Software Engineer · Mobile & Web Developer · ML Engineer";
   const mounted = useMounted();
 
+  const dotRef = useRef<HTMLSpanElement | null>(null);
+  const headshotTargetRef = useRef<HTMLDivElement | null>(null);
+  const [arrived, setArrived] = useState(false);
+
   return (
-    <section className="py-14 md:py-20">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex flex-col items-center text-center"
-      >
-        {/* Photo */}
-        <Image
-          src={headshot}
-          alt="Parth Kulkarni headshot"
-          width={260}
-          height={260}
-          placeholder="blur"
-          priority
-          className="mt-3 rounded-full border object-cover object-top
-                     w-[160px] h-[160px] md:w-[180px] md:h-[180px] lg:w-[200px] lg:h-[200px] xl:w-[220px] xl:h-[220px]"
-        />
-
-        {/* Name */}
-        <h1 className="mt-5 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-          Hi, I’m{" "}
-          <span className="whitespace-pre" suppressHydrationWarning>
-            {mounted ? nameText : "Parth Kulkarni"}
-          </span>
-          {mounted && (
-            <span
-              aria-hidden
-              className={`ml-1 inline-block h-[1em] w-[2px] bg-current align-[-0.1em] transition-opacity ${
-                blinkName ? "opacity-100" : "opacity-0"
-              }`}
-            />
-          )}
-        </h1>
-
-        {/* Role */}
-        <p className="mt-2 text-lg md:text-xl text-muted-foreground">
-          {roleText}
-        </p>
-
-        {/* CTA row + socials on the SAME line */}
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <a href="#projects" className="rounded-xl border px-4 py-2 text-sm hover:bg-accent">
-            View Projects
-          </a>
-          <a
-            href="/Parth_Resume_SDE.pdf"
-            className="rounded-xl border px-4 py-2 text-sm hover:bg-accent"
-            target="_blank"
-            rel="noopener noreferrer"
+    <>
+      {/* PAGE 1 — Big name */}
+      <section className="relative mx-auto max-w-6xl px-5">
+        <div className="relative flex h-[100svh] items-center justify-center">
+          <h1
+            aria-label="Parth Kulkarni"
+            className="
+    relative z-[30]
+    font-[var(--font-display)] font-black tracking-[-0.02em]
+    leading-[0.85]
+    text-[clamp(3.75rem,10.5vw,9.5rem)]
+    bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent
+    text-center whitespace-nowrap
+  "
+            suppressHydrationWarning
           >
-            Download Resume
-          </a>
+            Parth&nbsp;Kulkarn
+            <span className="relative inline-block align-baseline" aria-hidden="true" suppressHydrationWarning>
+              {/* Use dotless i so we control the dot completely */}
+              <span className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-transparent">
+                ı
+              </span>
 
-          {/* Socials inline */}
-          <div className="ml-1 flex items-center gap-2">
+              {/* Invisible measurement dot only (no visible dot in the name) */}
+              <span
+                ref={dotRef}
+                className="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[0.24em] h-[0.24em] rounded-full opacity-0"
+                style={{ top: "-0.05em" }}
+                aria-hidden="true"
+              />
+            </span>
+          </h1>
+        </div>
+      </section>
+
+      {/* Dot → Headshot (overlay) */}
+      <DotToHeadshot
+        src={headshot}
+        alt="Parth headshot"
+        originRef={dotRef}
+        targetRef={headshotTargetRef}
+        endRadius={12}
+        startSize={26}
+        liftAt={0.12}            // ⬅️ stays under the H1 until ~12% progress
+        endOffsetVH={0.45}       // finish morph slightly earlier than target top so it docks before content shift
+        onArrive={() => setArrived(true)}
+        onArriveChange={(v) => setArrived(v)}
+      />
+
+      {/* PAGE 2 — Content */}
+      <section id="hero-content" className="relative mx-auto max-w-6xl px-5 pt-10 md:pt-14">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center text-center"
+        >
+          <h2 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+            Hi, I’m{" "}
+            <span className="whitespace-pre" suppressHydrationWarning>
+              {mounted ? nameText : "Parth Kulkarni"}
+            </span>
+            {mounted && (
+              <span
+                aria-hidden
+                className={`ml-1 inline-block h-[1em] w-[2px] bg-current align-[-0.1em] transition-opacity ${
+                  blinkName ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            )}
+          </h2>
+
+          <p className="mt-2 text-lg md:text-xl text-muted-foreground">
+            Software Engineer · Mobile & Web Developer · ML Engineer
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <a href="#projects" className="rounded-xl border px-4 py-2 text-sm hover:bg-accent">
+              View Projects
+            </a>
             <a
-              href="https://github.com/MaybeParth"               // ← update if needed
+              href="/Parth_Resume_SDE.pdf"
+              className="rounded-xl border px-4 py-2 text-sm hover:bg-accent"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="GitHub"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
             >
-              <Github className="h-4 w-4" />
-              <span className="sr-only">GitHub</span>
+              Download Resume
             </a>
 
-            <a
-              href="https://www.linkedin.com/in/parth-pramod-kulkarni-78a049227/"    // ← replace with your LinkedIn URL
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
-            >
-              <Linkedin className="h-4 w-4" />
-              <span className="sr-only">LinkedIn</span>
-            </a>
-
-            <a
-              href="https://www.instagram.com/pque_oh/"      // ← replace with your Instagram
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
-            >
-              <Instagram className="h-4 w-4" />
-              <span className="sr-only">Instagram</span>
-            </a>
-
-            <a
-              href="mailto:parth.kulkarni45@gmail.com"                      // ← replace with your email
-              aria-label="Email Parth"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
-            >
-              <Mail className="h-4 w-4" />
-              <span className="sr-only">Email</span>
-            </a>
+            <div className="ml-1 flex items-center gap-2">
+              <a
+                href="https://github.com/MaybeParth"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
+              >
+                <Github className="h-4 w-4" />
+                <span className="sr-only">GitHub</span>
+              </a>
+              <a
+                href="https://www.linkedin.com/in/parth-pramod-kulkarni-78a049227/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
+              >
+                <Linkedin className="h-4 w-4" />
+                <span className="sr-only">LinkedIn</span>
+              </a>
+              <a
+                href="https://www.instagram.com/pque_oh/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
+              >
+                <Instagram className="h-4 w-4" />
+              </a>
+              <a
+                href="mailto:parth.kulkarni45@gmail.com"
+                aria-label="Email Parth"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border text-muted-foreground hover:text-foreground hover:bg-accent"
+              >
+                <Mail className="h-4 w-4" />
+              </a>
+            </div>
           </div>
+
+          <p className="mt-6 max-w-2xl text-muted-foreground">
+            I build fast, reliable apps for web & mobile. Here are a few things I’ve shipped.
+          </p>
+        </motion.div>
+
+        {/* 3-COLUMN SHOWCASE */}
+        <div className="mt-14 grid items-start gap-10 md:grid-cols-3">
+          {/* Left */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-6"
+          >
+            <p className="text-base leading-7 text-muted-foreground">
+              I started problem-solving with{" "}
+              <ImageTooltip src={pythonImg} alt="LOGO programming language" placement="top">
+                <span className="font-medium text-foreground underline-offset-4">LOGO</span>
+              </ImageTooltip>{" "}
+              at <span className="font-medium text-foreground">15</span> — then dove into{" "}
+              <span className="font-semibold text-foreground">Turbo C++</span> with zero formal software background.
+              That curiosity led me into low-level work on the{" "}
+              <span className="font-semibold text-foreground">8085</span> microprocessor, and later a bachelor’s where I built projects in{" "}
+              <span className="font-semibold text-foreground">Java</span>,{" "}
+              <span className="font-semibold text-foreground">
+                <ImageTooltip src={pythonImg} alt="Python">Python</ImageTooltip>
+              </span>
+              , and <span className="font-semibold text-foreground">JavaScript</span>.
+              I picked up <span className="font-semibold text-foreground">Dart</span> via a Udemy course and earned an internship building a production app for a small-scale startup.
+            </p>
+
+            <Button asChild variant="outline" className="rounded-full">
+              <a href="/about">Read my story</a>
+            </Button>
+          </motion.div>
+
+          {/* Middle */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.06 }}
+            className="space-y-6"
+          >
+            <p className="text-base leading-7 text-muted-foreground">
+              I’m passionate about software engineering and UI/UX design. Frontend development lets
+              me blend both — building delightful, accessible experiences with strong engineering
+              foundations.
+            </p>
+
+            <Image
+              src={SignatureMark}
+              alt="Signature"
+              width={180}
+              height={80}
+              className="opacity-60"
+              aria-hidden
+            />
+          </motion.div>
+
+          {/* Right (destination frame) */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.12 }}
+            className="md:justify-self-end"
+          >
+            <Card className="relative grid aspect-square w-[260px] place-items-center rounded-full border bg-card/50 p-6 shadow-sm md:w-[300px]">
+              <div className="absolute inset-0 rounded-full ring-1 ring-border" />
+              <div
+                ref={headshotTargetRef}
+                className="relative size-full rounded-full bg-background/40 overflow-hidden"
+              >
+                <Image
+                  src={headshot}
+                  alt="Parth avatar"
+                  fill
+                  className="h-full w-full object-cover object-top transition-opacity duration-300"
+                  style={{ opacity: arrived ? 1 : 0 }}
+                  priority={false}
+                />
+              </div>
+            </Card>
+          </motion.div>
         </div>
 
-        {/* Subcopy */}
-        <p className="mt-6 max-w-2xl text-muted-foreground">
-          I build fast, reliable apps for web & mobile. Here are a few things I’ve shipped.
-        </p>
-      </motion.div>
-    </section>
+        <div className="relative mt-16 sm:mt-20" />
+      </section>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 // src/app/experience/page.tsx
 import type { Metadata } from "next";
-import ExperienceStacked from "@/components/experience-stacked"; // ✅ direct import
+import ExperienceStacked from "@/components/experience-stacked"; 
 
 export const metadata: Metadata = {
   title: "Experience — Parth Kulkarni",

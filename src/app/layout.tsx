@@ -1,8 +1,16 @@
 // src/app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import Navbar from "@/components/navbar";
 import ThemeProvider from "@/components/theme-provider";
+import { Bodoni_Moda } from "next/font/google";
+
+const display = Bodoni_Moda({
+  subsets: ["latin"],
+  weight: ["400","600", "700", "900"],
+  variable: "--font-display",
+});
 
 export const metadata: Metadata = {
   title: "Parth Kulkarni — Portfolio",
@@ -21,16 +29,19 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className="scroll-smooth">
-      <body className="bg-background text-foreground">
+      <body className="min-h-screen bg-background text-foreground antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"      // first visit = dark
-          enableSystem     // only change when user toggles
-          storageKey="pk-theme"    // persistent key in localStorage
+          defaultTheme="system"
+          enableSystem
+          storageKey="pk-theme"
           disableTransitionOnChange
         >
           <Navbar />
-          <main className="container mx-auto max-w-5xl px-4">{children}</main>
+          <main className="container mx-auto max-w-5xl px-4">
+            {children}
+          </main>
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
