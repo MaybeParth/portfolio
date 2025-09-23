@@ -22,7 +22,7 @@ export default function ProjectCard({
   return (
     <article className="group overflow-hidden rounded-2xl border bg-card transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-md">
       {image && (
-        <div className="relative h-56 w-full">
+        <div className="relative h-76 md:h-80 w-full">
           <Image
             src={image}
             alt={`${title} screenshot`}

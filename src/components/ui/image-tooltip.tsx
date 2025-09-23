@@ -181,7 +181,7 @@ export function ImageTooltip({
     const estW = mediaW;
     const estH = mediaH;
 
-    let top =
+    const top =
       placement === "top"
         ? rect.top - (estH + offset)
         : rect.bottom + offset;
