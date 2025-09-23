@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTypewriterCycle } from "@/hooks/use-typewriter-cycle";
 import useMounted from "@/hooks/use-mounted";
-import SignatureMark from "@/assets/signature.svg";
+import Signature from "./signature";
 import { ImageTooltip } from "@/components/ui/image-tooltip";
 import DotToHeadshot from "@/components/dot-to-headshot";
 import headshot from "/public/parth.jpeg";
@@ -28,7 +28,7 @@ export default function Hero() {
   return (
     <>
       {/* PAGE 1 — Big name */}
-      <section className="relative mx-auto max-w-6xl px-5">
+      <section className="relative w-full px-5">
         <div className="relative flex h-[100svh] items-center justify-center">
           <h1
             aria-label="Parth Kulkarni"
@@ -76,14 +76,14 @@ export default function Hero() {
       />
 
       {/* PAGE 2 — Content */}
-      <section id="hero-content" className="relative mx-auto max-w-6xl px-5 pt-10 md:pt-14">
+      <section id="hero-content" className="relative w-full px-5 pt-10 md:pt-14">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex flex-col items-center text-center"
+          className="flex flex-col items-start text-left"
         >
-          <h2 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
+          <h2 className="mt-2 text-3xl md:text-5xl font-bold tracking-tight text-foreground" suppressHydrationWarning>
             Hi, I’m{" "}
             <span className="whitespace-pre" suppressHydrationWarning>
               {mounted ? nameText : "Parth Kulkarni"}
@@ -158,38 +158,50 @@ export default function Hero() {
           <p className="mt-6 max-w-2xl text-muted-foreground">
             I build fast, reliable apps for web & mobile. Here are a few things I’ve shipped.
           </p>
+
+          
         </motion.div>
 
         {/* 3-COLUMN SHOWCASE */}
-        <div className="mt-14 grid items-start gap-10 md:grid-cols-3">
+        <div className="mt-14 grid gap-10 md:grid-cols-3 md:items-center">
           {/* Left */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.4 }}
-            className="space-y-6"
+            className="space-y-6 order-2 md:order-1"
           >
             <p className="text-base leading-7 text-muted-foreground">
               I started problem-solving with{" "}
-              <ImageTooltip src={pythonImg} alt="LOGO programming language" placement="top">
+              {/* <ImageTooltip src={pythonImg} alt="LOGO programming language" placement="top"> */}
                 <span className="font-medium text-foreground underline-offset-4">LOGO</span>
-              </ImageTooltip>{" "}
-              at <span className="font-medium text-foreground">15</span> — then dove into{" "}
+              {/* </ImageTooltip>{" "} */}
+              {" "}at <span className="font-medium text-foreground">15</span> — then dove into{" "}
               <span className="font-semibold text-foreground">Turbo C++</span> with zero formal software background.
               That curiosity led me into low-level work on the{" "}
               <span className="font-semibold text-foreground">8085</span> microprocessor, and later a bachelor’s where I built projects in{" "}
               <span className="font-semibold text-foreground">Java</span>,{" "}
               <span className="font-semibold text-foreground">
-                <ImageTooltip src={pythonImg} alt="Python">Python</ImageTooltip>
+                <ImageTooltip
+                  src={pythonImg}
+                  alt="Python"
+                  placement="top"
+                  width={150}
+                  followCursorX={true}
+                  followCursorY={true}
+                  offset={12}
+                  poster={pythonImg}
+                  /* To use a video instead of an image, add: videoSrc="/videos/python.mp4" */
+                >
+                  Python
+                </ImageTooltip>
               </span>
               , and <span className="font-semibold text-foreground">JavaScript</span>.
               I picked up <span className="font-semibold text-foreground">Dart</span> via a Udemy course and earned an internship building a production app for a small-scale startup.
             </p>
 
-            <Button asChild variant="outline" className="rounded-full">
-              <a href="/about">Read my story</a>
-            </Button>
+            
           </motion.div>
 
           {/* Middle */}
@@ -198,7 +210,7 @@ export default function Hero() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.4, delay: 0.06 }}
-            className="space-y-6"
+            className="space-y-6 order-3 md:order-2"
           >
             <p className="text-base leading-7 text-muted-foreground">
               I’m passionate about software engineering and UI/UX design. Frontend development lets
@@ -206,14 +218,7 @@ export default function Hero() {
               foundations.
             </p>
 
-            <Image
-              src={SignatureMark}
-              alt="Signature"
-              width={180}
-              height={80}
-              className="opacity-60"
-              aria-hidden
-            />
+            <Signature className="opacity-80 animate-color-cycle text-foreground dark:text-foreground" width={180} height={80} aria-hidden />
           </motion.div>
 
           {/* Right (destination frame) */}
@@ -222,9 +227,9 @@ export default function Hero() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.4, delay: 0.12 }}
-            className="md:justify-self-end"
+            className="md:justify-self-start order-1 md:order-3"
           >
-            <Card className="relative grid aspect-square w-[260px] place-items-center rounded-full border bg-card/50 p-6 shadow-sm md:w-[300px]">
+            <Card className="relative grid aspect-square w-[320px] place-items-center rounded-full border bg-card/50 p-6 shadow-sm md:w-[380px]">
               <div className="absolute inset-0 rounded-full ring-1 ring-border" />
               <div
                 ref={headshotTargetRef}

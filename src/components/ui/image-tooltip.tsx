@@ -41,9 +41,9 @@ type Props = {
 
   followCursorX?: boolean;
   followCursorY?: boolean;
-  followEase?: number;   // 0.25–0.45
-  yFollowEase?: number;  // 0.18–0.30
-  maxYDrift?: number;    // px around trigger midline
+  followEase?: number;
+  yFollowEase?: number;
+  maxYDrift?: number;
 
   // Style hooks
   highlightClassName?: string;
@@ -76,20 +76,17 @@ export function ImageTooltip({
   yFollowEase = 0.22,
   maxYDrift = 18,
 
-  // green-tinted word + hover underline
+  // Green underline by default; keep it `nowrap` to prevent line splits.
   highlightClassName = [
-  "relative inline-block align-baseline cursor-pointer select-none text-foreground",
-
-  // underline (visible by default)
-  "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-[2px]",
-  "after:rounded-full after:bg-emerald-500 dark:after:bg-emerald-400",
-  "after:origin-left after:scale-x-100 after:opacity-100",
-
-  // smoothly hide the line WHEN the tooltip is actually visible
-  "data-[active=true]:after:scale-x-0 data-[active=true]:after:opacity-0",
-
-  // animation
-  "after:transition-all after:duration-220 after:ease-out",
+    "relative inline-block align-baseline cursor-pointer select-none text-foreground",
+    "whitespace-nowrap", // <— important: prevents word from breaking across lines
+    // underline (visible by default)
+    "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-[2px]",
+    "after:rounded-full after:bg-emerald-500 dark:after:bg-emerald-400",
+    "after:origin-left after:scale-x-100 after:opacity-100",
+    // smoothly hide the line WHEN the tooltip is shown
+    "data-[active=true]:after:scale-x-0 data-[active=true]:after:opacity-0",
+    "after:transition-all after:duration-220 after:ease-out",
   ].join(" "),
   cardClassName = "",
   className = "",
@@ -103,10 +100,12 @@ export function ImageTooltip({
 
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [hovered, setHovered] = useState(false);
+
+  // NEW: we don’t fade in until we have a measured, correct position
+  const [positioned, setPositioned] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // position state
+  // position state (viewport/fixed coords)
   const [coords, setCoords] = useState<{ left: number; top: number }>({
     left: -9999,
     top: -9999,
@@ -125,6 +124,12 @@ export function ImageTooltip({
   const [timer, setTimer] = useState<number | null>(null);
   const [hideTimer, setHideTimer] = useState<number | null>(null);
   const descId = useId();
+
+  // touch gesture guards to avoid accidental open while scrolling
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
+  const touchMoved = useRef<boolean>(false);
+  const touchStartAt = useRef<number>(0);
 
   const mediaW = width ?? 128;
   const mediaH = height ?? Math.round(mediaW * (3 / 4));
@@ -164,25 +169,28 @@ export function ImageTooltip({
     }
   };
 
-  /** Seed position at trigger center BEFORE showing, then finalize next frame.
-   *  This prevents the “first hover appears far away” glitch.
+  /**
+   * 1) Seed position at trigger center BEFORE showing,
+   *    using an estimated width/height — prevents “flash far away”.
    */
   const seedAtTrigger = useCallback(() => {
     const trg = triggerRef.current;
     if (!trg) return;
     const rect = trg.getBoundingClientRect();
 
-    // seed with an estimated width (mediaW) so the first paint is near-perfect
     const estW = mediaW;
-    const left = rect.left + rect.width / 2 - estW / 2;
-    const top =
+    const estH = mediaH;
+
+    let top =
       placement === "top"
-        ? rect.top - (mediaH + offset)
+        ? rect.top - (estH + offset)
         : rect.bottom + offset;
+
+    const left = rect.left + rect.width / 2 - estW / 2;
 
     setCoords({
       left: clamp(left, 12, window.innerWidth - estW - 12),
-      top: clamp(top, 12, window.innerHeight - mediaH - 12),
+      top: clamp(top, 12, window.innerHeight - estH - 12),
     });
 
     // init follow
@@ -191,19 +199,23 @@ export function ImageTooltip({
 
     const baseTop =
       placement === "top"
-        ? rect.top - (mediaH + offset)
+        ? rect.top - (estH + offset)
         : rect.bottom + offset;
     baseTopRef.current = baseTop;
     targetTop.current = baseTop;
     smoothTop.current = baseTop;
   }, [mediaW, mediaH, offset, placement]);
 
+  /**
+   * 2) Finalize exact position after the tooltip DOM exists.
+   *    This reads the real tooltip size and flips placement when needed.
+   */
   const finalizePosition = useCallback(() => {
     const trg = triggerRef.current;
     const tip = tipRef.current;
     if (!trg || !tip) return;
 
-    // temporarily ensure it's measurable
+    // Temporarily make it measurable
     const prevVis = tip.style.visibility;
     tip.style.visibility = "hidden";
     tip.style.left = "0px";
@@ -213,7 +225,7 @@ export function ImageTooltip({
     const tipRect = tip.getBoundingClientRect();
     tipWidth.current = tipRect.width || mediaW;
 
-    // compute final
+    let nextPlacement: Placement = placement;
     let left = trgRect.left + trgRect.width / 2 - tipWidth.current / 2;
     let top =
       placement === "top"
@@ -224,25 +236,25 @@ export function ImageTooltip({
     const vh = window.innerHeight;
     const margin = 12;
 
-    // flip if needed
+    // Flip if outside viewport
     if (placement === "top" && top < margin) {
+      nextPlacement = "bottom";
       top = trgRect.bottom + offset;
-      setCurrentPlacement("bottom");
     } else if (placement === "bottom" && top + tipRect.height > vh - margin) {
+      nextPlacement = "top";
       top = trgRect.top - tipRect.height - offset;
-      setCurrentPlacement("top");
-    } else {
-      setCurrentPlacement(placement);
     }
 
     left = clamp(left, margin, vw - tipWidth.current - margin);
     top = clamp(top, margin, vh - tipRect.height - margin);
 
-    // restore
+    // Restore visibility AFTER calculating
     tip.style.visibility = prevVis;
 
-    // set & sync follow baselines
+    setCurrentPlacement(nextPlacement);
     setCoords({ left, top });
+
+    // Sync follow baselines with final numbers
     baseTopRef.current = top;
     targetLeft.current = left + tipWidth.current / 2;
     smoothLeft.current = targetLeft.current;
@@ -250,26 +262,26 @@ export function ImageTooltip({
     smoothTop.current = top;
   }, [mediaW, offset, placement]);
 
+  /**
+   * SHOW: seed immediately, mount tooltip hidden, then finalize in layout,
+   * then reveal (fade/scale) once positioned.
+   */
   const show = useCallback(() => {
     clearTimers();
-    setHovered(true);
-    // 1) make it visible and seed coords immediately (no flash far away)
     seedAtTrigger();
+    setPositioned(false);
     setVisible(true);
+  }, [seedAtTrigger]);
 
-    // 2) on the very next frame, measure & correct; then run entrance anim
-    requestAnimationFrame(() => {
-      finalizePosition();
-      setIsAnimating(true);
-    });
-  }, [seedAtTrigger, finalizePosition]);
-
+  /**
+   * HIDE with a tiny delay to allow exit transition.
+   */
   const hide = useCallback(() => {
     clearTimers();
-    setHovered(false);
     setIsAnimating(false);
     const id = window.setTimeout(() => {
       setVisible(false);
+      setPositioned(false);
     }, 150);
     setHideTimer(id);
 
@@ -279,10 +291,24 @@ export function ImageTooltip({
     }
   }, []);
 
+  /**
+   * On first mount of the portal, compute exact placement synchronously
+   * before first painted frame (layout effect), then reveal.
+   */
+  useLayoutEffect(() => {
+    if (!visible) return;
+    finalizePosition();
+    setPositioned(true);
+    // start entrance after it’s positioned
+    requestAnimationFrame(() => setIsAnimating(true));
+  }, [visible, finalizePosition]);
+
   // Reposition on resize/scroll while open
   useLayoutEffect(() => {
     if (!visible) return;
-    const onReflow = () => finalizePosition();
+    const onReflow = () => {
+      finalizePosition();
+    };
     window.addEventListener("resize", onReflow);
     window.addEventListener("scroll", onReflow, { passive: true });
     return () => {
@@ -381,21 +407,40 @@ export function ImageTooltip({
       <span
         ref={triggerRef}
         className={`${highlightClassName} ${className}`}
-        data-active={visible || hovered}
-        onMouseEnter={show}
+        data-active={visible}
+        onMouseEnter={() => {
+          const id = window.setTimeout(show, delay);
+          setTimer(id);
+        }}
         onMouseLeave={hide}
         onFocus={show}
         onBlur={hide}
-        onTouchStart={() => {
+        onTouchStart={(e) => {
+          const t = e.touches[0];
+          touchStartX.current = t.clientX;
+          touchStartY.current = t.clientY;
+          touchMoved.current = false;
+          touchStartAt.current = Date.now();
+        }}
+        onTouchMove={(e) => {
+          const t = e.touches[0];
+          const dx = Math.abs(t.clientX - touchStartX.current);
+          const dy = Math.abs(t.clientY - touchStartY.current);
+          if (dx > 8 || dy > 8) touchMoved.current = true;
+        }}
+        onTouchEnd={() => {
+          const duration = Date.now() - touchStartAt.current;
+          const isTap = !touchMoved.current && duration < 300;
+          if (!isTap) return; // ignore scrolls/long drags
           seedAtTrigger();
+          setPositioned(false);
           setVisible((v) => !v);
-          requestAnimationFrame(() => finalizePosition());
         }}
         role="button"
         tabIndex={0}
         aria-describedby={visible ? descId : undefined}
         aria-expanded={visible}
-        style={{ cursor: "pointer" }} // no help cursor
+        style={{ cursor: "pointer" }}
       >
         {children}
       </span>
@@ -409,12 +454,16 @@ export function ImageTooltip({
               style={{
                 left: coords.left,
                 top: coords.top,
+                // Hide the tooltip entirely until we've measured & positioned it
+                visibility: positioned ? "visible" : "hidden",
                 transformOrigin: origin,
                 willChange: "transform, opacity, left, top",
-                opacity: isAnimating ? 1 : 0,
-                transform: `translateZ(0) scale(${isAnimating ? 1 : 0.92})`,
+                opacity: positioned && isAnimating ? 1 : 0,
+                transform: `translateZ(0) scale(${positioned && isAnimating ? 1 : 0.92})`,
                 transition:
-                  "transform 160ms cubic-bezier(.3,.7,.4,1.2), opacity 140ms ease",
+                  positioned
+                    ? "transform 160ms cubic-bezier(.3,.7,.4,1.2), opacity 140ms ease"
+                    : "none",
               }}
               data-placement={currentPlacement}
               aria-hidden

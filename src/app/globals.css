@@ -120,3 +120,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  @keyframes color-cycle {
+    0% { color: var(--chart-1); }
+    25% { color: var(--chart-2); }
+    50% { color: var(--chart-3); }
+    75% { color: var(--chart-4); }
+    100% { color: var(--chart-1); }
+  }
+
+  .animate-color-cycle {
+    animation: color-cycle 10s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-color-cycle {
+      animation: none;
+    }
+  }
+}
