@@ -7,12 +7,22 @@ import { useEffect, useState } from "react";
  */
 export function useTypewriter(text: string, speed = 90) {
   const [index, setIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (index > text.length) return;
-    const t = setTimeout(() => setIndex((i) => i + 1), speed);
-    return () => clearTimeout(t);
-  }, [index, text, speed]);
+    setMounted(true);
+  }, []);
 
-  return text.slice(0, Math.min(index, text.length));
+  useEffect(() => {
+    if (!mounted || index > text.length) return;
+    
+    const timeoutId = setTimeout(() => setIndex((i) => i + 1), speed);
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [index, text, speed, mounted]);
+
+  // Return empty string during SSR to prevent hydration mismatch
+  return mounted ? text.slice(0, Math.min(index, text.length)) : "";
 }

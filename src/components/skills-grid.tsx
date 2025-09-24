@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { skills } from "@/lib/data";
 
@@ -29,18 +29,17 @@ const iconMap: IconMap = {
   AWS: "devicon-amazonwebservices-plain",
   Git: "devicon-git-plain",
   Jenkins: "devicon-jenkins-plain",
+  SQLite: "devicon-sqlite-plain",
+  Firebase: "devicon-firebase-plain",
 };
 
-function toSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/\+\+/g, "pp")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
 
 export default function SkillsGrid() {
-  const items = useMemo(() => skills.slice(0, 24), []);
+  const items = useMemo(() => {
+    if (!Array.isArray(skills)) return [];
+    return skills.slice(0, 26);
+  }, []);
+  const [touchedItems, setTouchedItems] = useState<Set<string>>(new Set());
 
   return (
     <section id="skills" className="w-full py-12">
@@ -52,7 +51,7 @@ export default function SkillsGrid() {
           A quick snapshot of tools and technologies I use.
         </p>
 
-        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 touch-manipulation">
           {items.map((s, i) => (
             <motion.div
               key={s.text}
@@ -63,9 +62,31 @@ export default function SkillsGrid() {
               className="group relative"
             >
               <div
-                className="flex h-28 items-center justify-center rounded-xl border bg-card/60 p-3 text-center shadow-sm transition-transform transition-shadow duration-200 group-hover:-translate-y-1 group-hover:shadow-md"
+                className={`flex h-28 items-center justify-center rounded-xl border p-3 text-center shadow-sm transition-all duration-200 ${
+                  touchedItems.has(s.text) 
+                    ? 'bg-card/80 scale-95 shadow-md' 
+                    : 'bg-card/60 group-hover:-translate-y-1 group-hover:shadow-md active:scale-95 active:bg-card/80'
+                }`}
                 role="figure"
                 aria-label={s.text}
+                onTouchStart={() => {
+                  // Add haptic feedback on touch devices
+                  if ('vibrate' in navigator) {
+                    navigator.vibrate(10);
+                  }
+                  // Track touched items for visual feedback
+                  setTouchedItems(prev => new Set([...prev, s.text]));
+                }}
+                onTouchEnd={() => {
+                  // Reset after a short delay
+                  setTimeout(() => {
+                    setTouchedItems(prev => {
+                      const newSet = new Set(prev);
+                      newSet.delete(s.text);
+                      return newSet;
+                    });
+                  }, 150);
+                }}
               >
                 <div className="flex flex-col items-center justify-center">
                   {s.text.toLowerCase() === "scikit-learn" ? (

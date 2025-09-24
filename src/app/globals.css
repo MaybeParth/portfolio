@@ -140,3 +140,216 @@
     }
   }
 }
+
+/* River of Media Effect */
+.hobbies-river {
+  padding: 40px 0 80px 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.hobbies-river-track {
+  display: flex;
+  gap: 2rem;
+  will-change: transform;
+  width: max-content;
+  animation: river-flow 30s linear infinite;
+}
+
+.hobbies-river-track .hobby-card {
+  flex-shrink: 0;
+  width: 16rem;
+  height: 18rem;
+}
+
+@keyframes river-flow {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+/* Pause animation on hover */
+.hobbies-river:hover .hobbies-river-track {
+  animation-play-state: paused;
+}
+
+/* Animation control classes */
+.animate-river {
+  animation: river-flow 30s linear infinite;
+}
+
+.paused {
+  animation-play-state: paused;
+}
+
+/* Fade in animation for hovered card */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* All cards same size by default */
+.hobbies-swiper .hobby-card {
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 0.3s ease-out, opacity 0.3s ease;
+}
+
+/* Hover scaling - cards can scale up */
+.hobbies-swiper .hobby-card:hover {
+  transform: scale(1.1);
+  z-index: 15;
+  position: relative;
+}
+
+/* Ensure all cards stay same size when not hovered */
+.hobbies-swiper .swiper-slide-active .hobby-card {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Override any Swiper default scaling */
+.hobbies-swiper .swiper-slide {
+  transform: scale(1);
+}
+
+
+.hobbies-swiper .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: hsl(var(--muted));
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.hobbies-swiper .swiper-pagination-bullet-active {
+  background: hsl(var(--primary));
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.hobbies-swiper .swiper-pagination-bullet:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.hobbies-swiper .swiper-button-next,
+.hobbies-swiper .swiper-button-prev {
+  color: hsl(var(--foreground));
+  transition: all 0.3s ease;
+}
+
+.hobbies-swiper .swiper-button-next:hover,
+.hobbies-swiper .swiper-button-prev:hover {
+  color: hsl(var(--primary));
+  transform: scale(1.1);
+}
+
+/* GSAP Animation Classes */
+.hobby-card {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer Effect - CSS-based */
+.hobby-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  pointer-events: none;
+  z-index: 1;
+  transition: left 0.6s ease-out;
+}
+
+.hobby-card.is-hovered::after {
+  left: 100%;
+}
+
+/* Focus states for accessibility */
+.hobby-card:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+button:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Progress Bar Animation */
+.progress-bar {
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
+  box-shadow: 0 0 10px hsl(var(--primary) / 0.3);
+}
+
+/* Infinite Scroll Enhancement */
+.hobbies-swiper .swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Control button positioning */
+.hobbies-slider-controls {
+  position: relative;
+  z-index: 50;
+  pointer-events: auto;
+}
+
+.hobbies-slider-controls button {
+  position: relative;
+  z-index: 51;
+  pointer-events: auto;
+}
+
+/* Enhanced Mobile Responsiveness */
+@media (max-width: 768px) {
+  .hobbies-swiper .swiper-button-next,
+  .hobbies-swiper .swiper-button-prev {
+    display: none;
+  }
+  
+  .hobbies-swiper .swiper-pagination {
+    position: relative;
+    margin-top: 20px;
+  }
+  
+  .hobby-card {
+    margin: 0 auto;
+  }
+}

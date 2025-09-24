@@ -12,37 +12,50 @@ export function useTypewriterCycle(
   const [wordIndex, setWordIndex] = useState(0);
   const [subIndex, setSubIndex] = useState(0);
   const [blink, setBlink] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   const currentWord = words[wordIndex] || "";
 
   useEffect(() => {
-    const id = setInterval(() => setBlink(b => !b), 500);
-    return () => clearInterval(id);
+    setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!currentWord) return;
+    if (!mounted) return;
+    const id = setInterval(() => setBlink(b => !b), 500);
+    return () => clearInterval(id);
+  }, [mounted]);
+
+  useEffect(() => {
+    if (!mounted || !currentWord) return;
+    
+    let timeoutId: NodeJS.Timeout;
+    
     if (phase === "typing") {
       if (subIndex < currentWord.length) {
-        const t = setTimeout(() => setSubIndex(i => i + 1), typingSpeed);
-        return () => clearTimeout(t);
+        timeoutId = setTimeout(() => setSubIndex(i => i + 1), typingSpeed);
+      } else {
+        timeoutId = setTimeout(() => setPhase("pausing"), pauseBetweenWords);
       }
-      const t = setTimeout(() => setPhase("pausing"), pauseBetweenWords);
-      return () => clearTimeout(t);
-    }
-    if (phase === "pausing") {
-      const t = setTimeout(() => setPhase("deleting"), 0);
-      return () => clearTimeout(t);
-    }
-    if (phase === "deleting") {
+    } else if (phase === "pausing") {
+      timeoutId = setTimeout(() => setPhase("deleting"), 0);
+    } else if (phase === "deleting") {
       if (subIndex > 0) {
-        const t = setTimeout(() => setSubIndex(i => i - 1), deletingSpeed);
-        return () => clearTimeout(t);
+        timeoutId = setTimeout(() => setSubIndex(i => i - 1), deletingSpeed);
+      } else {
+        setWordIndex(i => (i + 1) % words.length);
+        setPhase("typing");
       }
-      setWordIndex(i => (i + 1) % words.length);
-      setPhase("typing");
     }
-  }, [phase, subIndex, currentWord, typingSpeed, deletingSpeed, pauseBetweenWords, words.length]);
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [mounted, phase, subIndex, currentWord, typingSpeed, deletingSpeed, pauseBetweenWords, words.length]);
 
-  return { text: currentWord.slice(0, subIndex), blink };
+  // Return empty text during SSR to prevent hydration mismatch
+  return { 
+    text: mounted ? currentWord.slice(0, subIndex) : "", 
+    blink: mounted ? blink : true 
+  };
 }

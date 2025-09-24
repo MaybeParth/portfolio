@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { Github, Linkedin, Instagram, Mail } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useTypewriterCycle } from "@/hooks/use-typewriter-cycle";
 import useMounted from "@/hooks/use-mounted";
 import Signature from "./signature";
@@ -53,7 +52,11 @@ export default function Hero() {
               <span
                 ref={dotRef}
                 className="pointer-events-none absolute left-1/2 -translate-x-1/2 w-[0.24em] h-[0.24em] rounded-full opacity-0"
-                style={{ top: "-0.05em" }}
+                style={{ 
+                  top: "clamp(-0.02em, -0.05em, -0.08em)",
+                  width: "clamp(0.2em, 0.24em, 0.28em)",
+                  height: "clamp(0.2em, 0.24em, 0.28em)"
+                }}
                 aria-hidden="true"
               />
             </span>

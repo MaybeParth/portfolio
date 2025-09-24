@@ -79,6 +79,51 @@ export const experiences = [
 ];
 
 // src/lib/data.ts
+export const hobbies = [
+  {
+    title: "Hiking",
+    description: "Exploring trails and connecting with nature. Always looking for the next challenging peak to conquer.",
+    image: "/hobbies/Hiking.jpeg",
+    activities: ["Mountain Trails", "Nature Walks", "Adventure"]
+  },
+  {
+    title: "Skateboarding",
+    description: "Riding the streets and mastering tricks. Love the freedom, creativity, and flow of skateboarding.",
+    image: "/hobbies/Skating.mp4",
+    activities: ["Street Skating", "Trick Riding", "Urban Sports"]
+  },
+  {
+    title: "Skiing",
+    description: "Carving through snow-covered slopes and experiencing the thrill of winter sports.",
+    image: "/hobbies/Skiing.mp4",
+    activities: ["Downhill Skiing", "Winter Sports", "Mountain Adventures"]
+  },
+  {
+    title: "Soccer",
+    description: "Playing the beautiful game with passion and teamwork. Love the strategy and athleticism of soccer.",
+    image: "/hobbies/Soccer1.jpeg",
+    activities: ["Team Sports", "Competition", "Fitness"]
+  },
+  {
+    title: "Squash",
+    description: "Fast-paced racquet sport that combines strategy, agility, and endurance in an intense workout.",
+    image: "/hobbies/Squash.mp4",
+    activities: ["Racquet Sports", "Indoor Sports", "High Intensity"]
+  },
+  {
+    title: "Photography",
+    description: "Capturing beautiful moments and sunsets, exploring different perspectives through the lens.",
+    image: "/hobbies/Sunset.jpeg",
+    activities: ["Nature Photography", "Sunset Shots", "Landscape"]
+  },
+  {
+    title: "Traveling",
+    description: "Exploring new places, cultures, and experiences. Always seeking new adventures and discoveries.",
+    image: "/hobbies/Travelling.jpeg",
+    activities: ["Adventure Travel", "Cultural Exploration", "New Experiences"]
+  }
+];
+
 export const skills = [
   { text: "Next.js", value: 80 },
   { text: "React", value: 90 },
@@ -101,5 +146,7 @@ export const skills = [
   { text: "Git", value: 60 },
   { text: "AWS", value: 55 },
   { text: "Docker", value: 50 },
+  { text: "SQLite", value: 70 },
+  { text: "Firebase", value: 65 },
 ];
 

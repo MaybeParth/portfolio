@@ -237,9 +237,10 @@ export default function DotToHeadshot({
   });
 
   useEffect(() => {
+    const origin = originRef.current;
     return () => {
-      if (originRef.current) {
-        (originRef.current as HTMLElement).style.opacity = "1";
+      if (origin) {
+        (origin as HTMLElement).style.opacity = "1";
       }
     };
   }, [originRef]);

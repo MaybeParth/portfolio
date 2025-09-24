@@ -158,7 +158,7 @@ export function ImageTooltip({
     };
   }, [timer, hideTimer]);
 
-  const clearTimers = () => {
+  const clearTimers = useCallback(() => {
     if (timer) {
       window.clearTimeout(timer);
       setTimer(null);
@@ -167,7 +167,7 @@ export function ImageTooltip({
       window.clearTimeout(hideTimer);
       setHideTimer(null);
     }
-  };
+  }, [timer, hideTimer]);
 
   /**
    * 1) Seed position at trigger center BEFORE showing,
@@ -271,7 +271,7 @@ export function ImageTooltip({
     seedAtTrigger();
     setPositioned(false);
     setVisible(true);
-  }, [seedAtTrigger]);
+  }, [seedAtTrigger, clearTimers]);
 
   /**
    * HIDE with a tiny delay to allow exit transition.
@@ -289,7 +289,7 @@ export function ImageTooltip({
       cancelAnimationFrame(rafFollow.current);
       rafFollow.current = null;
     }
-  }, []);
+  }, [clearTimers]);
 
   /**
    * On first mount of the portal, compute exact placement synchronously
