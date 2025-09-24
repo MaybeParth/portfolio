@@ -2,7 +2,7 @@
 
 import Hero from "@/components/hero";
 import SkillsGrid from "@/components/skills-grid";
-import HobbiesSlider from "@/components/hobbies-slider";
+import BookCarousel from "@/components/book-carousel";
 import Projects from "@/components/projects";
 import ContactForm from "@/components/contact-form";
 import { hobbies } from "@/lib/data";
@@ -25,15 +25,9 @@ export default function Home() {
       <Hero />
       <div className="mt-4" />
       <SkillsGrid />
-      <section className="py-12 w-full">
-        <h2 className="text-xl md:text-2xl font-semibold mb-8 text-center">Hobbies & Interests</h2>
-        <HobbiesSlider 
-          hobbies={hobbies} 
-          onVideoClick={openVideoModal}
-          autoplaySpeed={4000}
-          showControls={true}
-        />
-      </section>
+      <Projects />
+              {/* Book of Hobbies */}
+              <BookCarousel hobbies={hobbies} onMediaClick={openVideoModal} />
 
               {/* Media Modal */}
               {selectedVideo && (
@@ -69,7 +63,7 @@ export default function Home() {
                 </div>
               )}
 
-      <Projects />
+      
       <section id="contact" className="py-12">
         <h2 className="text-xl md:text-2xl font-semibold mb-6">Contact</h2>
         <ContactForm />

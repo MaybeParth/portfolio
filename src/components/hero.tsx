@@ -159,7 +159,7 @@ export default function Hero() {
           </div>
 
           <p className="mt-6 max-w-2xl text-muted-foreground">
-            I build fast, reliable apps for web & mobile. Here are a few things I’ve shipped.
+            Systems that don’t just work—they <ImageTooltip src="/flow.mp4" alt="Flow" placement="top" width={90} height={70} followCursorX={true} followCursorY={true} offset={12}>flow</ImageTooltip>.
           </p>
 
           
@@ -186,22 +186,10 @@ export default function Hero() {
               <span className="font-semibold text-foreground">8085</span> microprocessor, and later a bachelor’s where I built projects in{" "}
               <span className="font-semibold text-foreground">Java</span>,{" "}
               <span className="font-semibold text-foreground">
-                <ImageTooltip
-                  src={pythonImg}
-                  alt="Python"
-                  placement="top"
-                  width={150}
-                  followCursorX={true}
-                  followCursorY={true}
-                  offset={12}
-                  poster={pythonImg}
-                  /* To use a video instead of an image, add: videoSrc="/videos/python.mp4" */
-                >
-                  Python
-                </ImageTooltip>
+                Python
               </span>
               , and <span className="font-semibold text-foreground">JavaScript</span>.
-              I picked up <span className="font-semibold text-foreground">Dart</span> via a Udemy course and earned an internship building a production app for a small-scale startup.
+              I picked up <span className="font-semibold text-foreground">Dart</span> and built a production app for a small-scale startup.
             </p>
 
             
