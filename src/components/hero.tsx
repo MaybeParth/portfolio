@@ -193,7 +193,7 @@ export default function Hero() {
             </p>
 
             
-          </motion.div>
+          </motion.div> 
 
           {/* Middle */}
           <motion.div
