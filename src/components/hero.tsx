@@ -11,7 +11,6 @@ import Signature from "./signature";
 import { ImageTooltip } from "@/components/ui/image-tooltip";
 import DotToHeadshot from "@/components/dot-to-headshot";
 import headshot from "/public/parth.jpeg";
-import pythonImg from "/public/python.jpg";
 
 export default function Hero() {
   const { text: nameText, blink: blinkName } = useTypewriterCycle(

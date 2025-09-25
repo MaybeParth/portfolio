@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import HTMLFlipBook from "react-pageflip";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type Hobby = {
   title: string;
@@ -15,31 +14,17 @@ type Hobby = {
 type Props = {
   hobbies: Hobby[];
   onMediaClick?: (src: string) => void;
-  onModalClose?: () => void;
 };
 
-export default function ReactPageFlipBook({ hobbies, onMediaClick, onModalClose }: Props) {
+export default function ReactPageFlipBook({ hobbies, onMediaClick }: Props) {
   const [currentPage, setCurrentPage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const flipBookRef = useRef<any>(null);
+  const flipBookRef = useRef<HTMLFlipBook>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const pages = hobbies.filter((h) => !!h.image);
-  const totalPages = pages.length;
 
-  const goNext = () => {
-    if (flipBookRef.current) {
-      flipBookRef.current.pageFlip().flipNext();
-    }
-  };
-
-  const goPrev = () => {
-    if (flipBookRef.current) {
-      flipBookRef.current.pageFlip().flipPrev();
-    }
-  };
-
-  const handlePageChange = (e: any) => {
+  const handlePageChange = (e: { data: number }) => {
     // Don't change page if modal is open
     if (isModalOpen) {
       return;
