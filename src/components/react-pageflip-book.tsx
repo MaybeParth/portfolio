@@ -19,6 +19,7 @@ type Props = {
 export default function ReactPageFlipBook({ hobbies, onMediaClick }: Props) {
   const [currentPage, setCurrentPage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const flipBookRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
