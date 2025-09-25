@@ -47,7 +47,6 @@ export default function Home() {
               <ReactPageFlipBook 
                 hobbies={hobbies} 
                 onMediaClick={openVideoModal}
-                onModalClose={closeVideoModal}
               />
 
               {/* Media Modal */}
