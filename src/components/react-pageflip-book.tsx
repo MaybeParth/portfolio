@@ -121,11 +121,14 @@ export default function ReactPageFlipBook({ hobbies, onMediaClick, onModalClose 
               >
                 {/* Cover Page */}
                 <div className="page" style={{ background: 'transparent' }}>
-                  <div className="page-content cover h-full w-full flex items-center justify-center bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-neutral-800 dark:to-neutral-700 text-foreground dark:text-white border border-yellow-200/80 dark:border-neutral-600/70 rounded-l-xl">
-                    <div className="text-center px-6">
+                  <div className="page-content cover h-full w-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-amber-200 dark:from-neutral-800 dark:to-neutral-700 text-foreground dark:text-white border-2 border-amber-300 dark:border-neutral-600/70 rounded-l-xl shadow-2xl relative" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)' }}>
+                    {/* Book spine */}
+                    <div className="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b from-amber-600 to-amber-700 rounded-l-xl" />
+                    {/* Embossed title effect */}
+                    <div className="text-center px-6 relative">
                       <div className="mx-auto mb-2 h-[2px] w-12 rounded-full bg-foreground/20" />
                       <div className="text-[10px] md:text-xs uppercase tracking-[0.25em] text-foreground/70">Book of</div>
-                      <div className="mt-1 text-2xl md:text-3xl font-extrabold tracking-wide text-foreground dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-amber-300 dark:via-yellow-200 dark:to-amber-100 drop-shadow-[0_1px_0_rgba(0,0,0,0.2)]">
+                      <div className="mt-1 text-2xl md:text-3xl font-extrabold tracking-wide text-foreground dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-amber-300 dark:via-yellow-200 dark:to-amber-100 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.1)' }}>
                         Hobbies
                       </div>
                       <div className="mx-auto mt-2 h-[2px] w-12 rounded-full bg-foreground/20" />
@@ -147,19 +150,6 @@ export default function ReactPageFlipBook({ hobbies, onMediaClick, onModalClose 
                         </div>
                       </div>
 
-                      {/* Turn page instruction */}
-                      <div className="mt-6">
-                        <p 
-                          className="text-lg md:text-xl text-foreground/70 dark:text-white/70 italic"
-                          style={{ 
-                            fontFamily: 'Chalkduster, "Comic Sans MS", cursive',
-                            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                            transform: 'rotate(-2deg)'
-                          }}
-                        >
-                          👆 Hold to turn the page
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -167,7 +157,7 @@ export default function ReactPageFlipBook({ hobbies, onMediaClick, onModalClose 
                 {/* Hobby Pages - Each hobby gets a single page with large media */}
                 {pages.map((hobby, index) => (
                   <div key={`${hobby.title}-${index}`} className="page">
-                    <div className="page-content h-full w-full flex flex-col bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-neutral-900 dark:to-neutral-800">
+                            <div className="page-content h-full w-full flex flex-col bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-neutral-900 dark:to-neutral-800">
                       {/* Title Header */}
                       <div className="p-6 pb-4 text-center">
                         <h3
