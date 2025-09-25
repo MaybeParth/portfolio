@@ -2,12 +2,12 @@
 
 import Hero from "@/components/hero";
 import SkillsGrid from "@/components/skills-grid";
-import BookCarousel from "@/components/book-carousel";
+import ReactPageFlipBook from "@/components/react-pageflip-book";
 import Projects from "@/components/projects";
 import ContactForm from "@/components/contact-form";
 import { hobbies } from "@/lib/data";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
@@ -20,6 +20,23 @@ export default function Home() {
     setSelectedVideo(null);
   };
 
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedVideo) {
+        closeVideoModal();
+      }
+    };
+
+    if (selectedVideo) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [selectedVideo]);
+
   return (
     <>
       <Hero />
@@ -27,7 +44,11 @@ export default function Home() {
       <SkillsGrid />
       <Projects />
               {/* Book of Hobbies */}
-              <BookCarousel hobbies={hobbies} onMediaClick={openVideoModal} />
+              <ReactPageFlipBook 
+                hobbies={hobbies} 
+                onMediaClick={openVideoModal}
+                onModalClose={closeVideoModal}
+              />
 
               {/* Media Modal */}
               {selectedVideo && (

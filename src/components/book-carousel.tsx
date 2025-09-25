@@ -44,6 +44,7 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
   const rightStaticRef = useRef<HTMLDivElement | null>(null);
   
   const [rightOverrideIndex, setRightOverrideIndex] = useState<number | null>(null);
+  const [leftOverrideIndex, setLeftOverrideIndex] = useState<number | null>(null);
   const openTlRef = useRef<gsap.core.Timeline | null>(null);
 
   const pages = useMemo(() => hobbies.filter((h) => !!h.image), [hobbies]);
@@ -58,10 +59,12 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
       setIndex((i) => (i + 1) % count);
       return;
     }
-    // Prepare flip page with the CURRENT media (outgoing), flipping from right to left
+    // Prepare flip: show the NEXT left-page text on the turning sheet (right → left)
     const nextIdx = (index + 1) % count;
-    prepareFlip("next", pages[index]?.image);
-    // We'll swap the right page to the NEXT media just after the flip starts
+    prepareFlip("next", undefined, pages[nextIdx]?.title ?? '', pages[nextIdx]?.description ?? '');
+    // Show NEXT left-page content immediately during flip for natural book behavior
+    setLeftOverrideIndex(nextIdx);
+    // We'll swap the right page to the NEXT media a touch later to avoid early flash
     if (rightStaticRef.current) gsap.set(rightStaticRef.current, { opacity: 0 });
     const tl = gsap.timeline({
       defaults: { ease: "power2.inOut" },
@@ -71,6 +74,7 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
         
         // Clear override after commit (static now matches state)
         setRightOverrideIndex(null);
+        setLeftOverrideIndex(null);
         if (pagesInnerRef.current) {
           gsap.fromTo(
             pagesInnerRef.current,
@@ -81,11 +85,21 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
         flippingRef.current = false;
       },
     });
+    const sheet = flipPageRef.current?.querySelector('.flip-inner') as HTMLDivElement | null;
+    const shade = flipPageRef.current?.querySelector('.flip-shade') as HTMLDivElement | null;
+    const highlight = flipPageRef.current?.querySelector('.flip-highlight') as HTMLDivElement | null;
+
     tl.fromTo(
       flipPageRef.current,
       { rotateY: 0, transformOrigin: "left center", opacity: 1 },
-      { rotateY: -180, duration: 0.5 }
+      { rotateY: -180, duration: 0.56 }
     )
+      .to(sheet, { skewY: -2.5, scaleX: 0.97, duration: 0.28, ease: "power2.out" }, 0.08)
+      .to(sheet, { skewY: 0, scaleX: 1, duration: 0.24, ease: "power2.in" }, ">-0.06")
+      .fromTo(shade, { opacity: 0.12, backgroundPositionX: 0 }, { opacity: 0.3, backgroundPositionX: -60, duration: 0.28, ease: "sine.out" }, 0.06)
+      .to(shade, { opacity: 0.14, duration: 0.22, ease: "sine.in" }, ">-0.08")
+      .fromTo(highlight, { opacity: 0.0 }, { opacity: 0.12, duration: 0.18 }, 0.06)
+      .to(highlight, { opacity: 0.0, duration: 0.22 }, ">-0.04")
       .add(() => setRightOverrideIndex(nextIdx), 0.02)
       .to(
       rightStaticRef.current,
@@ -103,11 +117,13 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
       return;
     }
     const prevIdx = (index - 1 + count) % count;
-    // Prepare flip page with the CURRENT media (outgoing) flipping back from left to right
-    prepareFlip("prev", pages[index]?.image);
-    // Pre-render the previous (target) media on right BEFORE flip so it's already visible during turn
+    // Prepare flip page with the CURRENT left page text (outgoing)
+    prepareFlip("prev", undefined, pages[index]?.title ?? '', pages[index]?.description ?? '');
+    // Pre-render the previous (target) content on both pages BEFORE flip so it's already visible during turn
     setRightOverrideIndex(prevIdx);
-    if (rightStaticRef.current) gsap.set(rightStaticRef.current, { opacity: 1 });
+    setLeftOverrideIndex(prevIdx);
+    if (rightStaticRef.current) gsap.set(rightStaticRef.current, { opacity: 1 }); // Ensure it's visible
+    if (leftStaticRef.current) gsap.set(leftStaticRef.current, { opacity: 1 }); // Ensure it's visible
     const tl = gsap.timeline({
       defaults: { ease: "power2.inOut" },
       onComplete: () => {
@@ -116,6 +132,7 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
         
         // Clear override after commit
         setRightOverrideIndex(null);
+        setLeftOverrideIndex(null); // Clear left override
         if (pagesInnerRef.current) {
           gsap.fromTo(
             pagesInnerRef.current,
@@ -126,21 +143,35 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
         flippingRef.current = false;
       },
     });
+    const sheetPrev = flipPageRef.current?.querySelector('.flip-inner') as HTMLDivElement | null;
+    const shadePrev = flipPageRef.current?.querySelector('.flip-shade') as HTMLDivElement | null;
+    const highlightPrev = flipPageRef.current?.querySelector('.flip-highlight') as HTMLDivElement | null;
+
     tl.fromTo(
       flipPageRef.current,
       { rotateY: 0, transformOrigin: "right center", opacity: 1 },
-      { rotateY: 180, duration: 0.5 }
-    );
+      { rotateY: 180, duration: 0.56 }
+    )
+      .to(sheetPrev, { skewY: 2.5, scaleX: 0.97, duration: 0.28, ease: "power2.out" }, 0.08)
+      .to(sheetPrev, { skewY: 0, scaleX: 1, duration: 0.24, ease: "power2.in" }, ">-0.06")
+      .fromTo(shadePrev, { opacity: 0.12, backgroundPositionX: 0 }, { opacity: 0.26, backgroundPositionX: 60, duration: 0.28, ease: "sine.out" }, 0.06)
+      .to(shadePrev, { opacity: 0.12, duration: 0.22, ease: "sine.in" }, ">-0.08")
+      .fromTo(highlightPrev, { opacity: 0.0 }, { opacity: 0.1, duration: 0.18 }, 0.06)
+      .to(highlightPrev, { opacity: 0.0, duration: 0.22 }, ">-0.04");
   };
 
-  function prepareFlip(direction: "next" | "prev", media?: string) {
+  function prepareFlip(direction: "next" | "prev", media?: string, title?: string, text?: string) {
     if (!flipPageRef.current) return;
     // Position over the correct half; overlay shows media ONLY on next (right → left). Prev stays blank.
     const el = flipPageRef.current;
-    const video = el.querySelector("video") as HTMLVideoElement | null;
-    const img = el.querySelector("img") as HTMLImageElement | null;
+    const video = el.querySelector(".flip-content video") as HTMLVideoElement | null;
+    const img = el.querySelector(".flip-content img") as HTMLImageElement | null;
+    const textEl = el.querySelector('.flip-content .flip-text') as HTMLDivElement | null;
     if (direction === "next" && media) {
       const isVideo = media.endsWith(".mp4");
+      if (textEl) {
+        textEl.style.display = 'none';
+      }
       if (isVideo) {
         if (img) img.style.display = "none";
         if (video) {
@@ -161,7 +192,15 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
         }
       }
     } else {
-      // keep blank for prev
+      // For prev, show TEXT content of the left page on the overlay while flipping
+      if (textEl) {
+        textEl.style.display = 'block';
+        // Simple styled content (calligraphy-like)
+        textEl.innerHTML = `
+          ${title ? `<h4 style="margin:0 0 8px; font-family:cursive; font-size:18px; line-height:1.2;">${title}</h4>` : ''}
+          ${text ? `<p style="margin:0; font-family:cursive; font-size:16px; line-height:1.6;">${text}</p>` : ''}
+        `;
+      }
       if (video) {
         video.pause();
         video.style.display = "none";
@@ -346,9 +385,13 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
           {/* Pages */}
           <div ref={pagesRef} className="absolute inset-0 rounded-xl overflow-hidden bg-background/80 border shadow-sm opacity-0" style={{ transformStyle: "preserve-3d", backfaceVisibility: "hidden", zIndex: 1 }}>
             <div ref={pagesInnerRef} className="absolute inset-0">
-              {/* Left Page: one-liner about the current media */}
+              {/* Left Page: one-liner about the current media (allow override during flip) */}
               <div ref={leftStaticRef} className="absolute top-0 left-0 h-full w-1/2 p-3 pr-2">
-                <TextPage title={current?.title} text={current?.description} side="left" />
+                <TextPage
+                  title={(leftOverrideIndex != null ? pages[leftOverrideIndex]?.title : current?.title)}
+                  text={(leftOverrideIndex != null ? pages[leftOverrideIndex]?.description : current?.description)}
+                  side="left"
+                />
               </div>
               {/* Right Page: render current media, but allow override during flip */}
               <div ref={rightStaticRef} className="absolute top-0 right-0 h-full w-1/2 p-3 pl-2">
@@ -376,17 +419,22 @@ export default function BookCarousel({ hobbies, title = "Book of Hobbies", onMed
                 zIndex: 6,
               }}
             >
-              <div className="relative h-full w-full rounded-lg overflow-hidden border bg-background">
-                <video
+              <div className="flip-inner relative h-full w-full rounded-lg overflow-hidden border bg-background" style={{ transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}>
+                <div className="flip-content absolute inset-0" style={{ transform: "rotateY(180deg)", transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}>
+                  <video
                   className="absolute inset-0 h-full w-full object-cover hidden"
                   muted
                   loop
                   playsInline
                 />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img className="absolute inset-0 h-full w-full object-cover hidden" alt="Hobby" />
+                  <img className="absolute inset-0 h-full w-full object-cover hidden" alt="Hobby" />
+                  {/* text overlay for left-page content during prev/next flip */}
+                  <div className="flip-text absolute inset-0 hidden p-6 text-foreground" style={{ zIndex: 5 }} />
+                </div>
                 {/* shading to sell the fold */}
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-l from-black/20 via-transparent to-transparent" />
+                <div className="flip-shade pointer-events-none absolute inset-0 bg-gradient-to-l from-black/20 via-transparent to-transparent" style={{ zIndex: 3 }} />
+                <div className="flip-highlight pointer-events-none absolute inset-0 bg-white/10 mix-blend-screen opacity-0" style={{ zIndex: 4 }} />
               </div>
             </div>
           </div>

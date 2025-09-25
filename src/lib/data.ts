@@ -101,7 +101,7 @@ export const hobbies = [
   {
     title: "Soccer",
     description: "Playing the beautiful game with passion and teamwork. Love the strategy and athleticism of soccer.",
-    image: "/hobbies/Soccer1.jpeg",
+    image: "/hobbies/Soccer2.mp4",
     activities: ["Team Sports", "Competition", "Fitness"]
   },
   {
