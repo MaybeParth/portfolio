@@ -19,7 +19,7 @@ type Props = {
 export default function ReactPageFlipBook({ hobbies, onMediaClick }: Props) {
   const [currentPage, setCurrentPage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const flipBookRef = useRef<HTMLFlipBook>(null);
+  const flipBookRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const pages = hobbies.filter((h) => !!h.image);
