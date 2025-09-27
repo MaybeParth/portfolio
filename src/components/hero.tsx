@@ -158,7 +158,7 @@ export default function Hero() {
           </div>
 
           <p className="mt-6 max-w-2xl text-muted-foreground">
-            Systems that don’t just work—they <ImageTooltip src="/flow.mp4" alt="Flow" placement="top" width={90} height={70} followCursorX={true} followCursorY={true} offset={12}>flow</ImageTooltip>.
+            Systems that don’t just work—they <ImageTooltip src="/Flow.mp4" alt="Flow" placement="top" width={90} height={70} followCursorX={true} followCursorY={true} offset={12}>flow</ImageTooltip>.
           </p>
 
           
