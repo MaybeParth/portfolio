@@ -10,7 +10,7 @@ type NavLink = { href: string; label: string };
 const LINKS: ReadonlyArray<NavLink> = [
   { href: "/#projects", label: "Projects" },      // hidden for now
   { href: "/experience", label: "Experience" },   // page link
-  { href: "/Parth_Resume_SDE.pdf", label: "Resume" },
+  { href: "/SoftwareEngineering_Resume.pdf", label: "Resume" },
 ] as const;
 
 const HIDDEN = new Set<NavLink["label"]>(["Projects"]);

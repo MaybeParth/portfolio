@@ -109,7 +109,7 @@ export default function Hero() {
               View Projects
             </a>
             <a
-              href="/Parth_Resume_SDE.pdf"
+              href="/SoftwareEngineering_Resume.pdf"
               className="rounded-xl border px-4 py-2 text-sm hover:bg-accent"
               target="_blank"
               rel="noopener noreferrer"
