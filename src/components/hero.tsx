@@ -10,7 +10,8 @@ import useMounted from "@/hooks/use-mounted";
 import Signature from "./signature";
 import { ImageTooltip } from "@/components/ui/image-tooltip";
 import DotToHeadshot from "@/components/dot-to-headshot";
-import headshot from "/public/parth.jpeg";
+
+const headshot = "/parth.jpeg";
 
 export default function Hero() {
   const { text: nameText, blink: blinkName } = useTypewriterCycle(
